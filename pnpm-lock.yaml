@@ -4,10 +4,12 @@ specifiers:
   apollo-server: 3.11.1
   graphql: 16.6.0
   standard: 17.0.0
+  uuid: 9.0.0
 
 dependencies:
   apollo-server: 3.11.1_graphql@16.6.0
   graphql: 16.6.0
+  uuid: 9.0.0
 
 devDependencies:
   standard: 17.0.0
