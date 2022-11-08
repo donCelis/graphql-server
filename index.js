@@ -1,4 +1,4 @@
-import { ApolloServer, gql } from 'apollo-server'
+import { ApolloServer, UserInputError, gql } from 'apollo-server'
 
 import { v4 as uuid } from 'uuid'
 
@@ -7,7 +7,7 @@ export const persons = [
     id: 1,
     firstName: 'Terry',
     lastName: 'Medhurst',
-    phone: '+63 791 675 8914',
+    /* phone: '+63 791 675 8914', */
     email: 'atuny0@sohu.com',
     bank: {
       cardExpire: '06/22',
@@ -77,6 +77,11 @@ export const persons = [
 
 /* Definición de los datos */
 const typeDefs = gql`
+  enum YesNo {
+    YES
+    NO
+  }
+
   type Bank {
     cardExpire: String!
     cardNumber: String!
@@ -86,7 +91,7 @@ const typeDefs = gql`
   }
 
   type FullNameObj {
-    name: String!
+    first: String!
     last: String!
   }
 
@@ -103,8 +108,8 @@ const typeDefs = gql`
 
   type Query {
     personCount: Int!
-    allPersons: [Person]!
-    findPerson(name: String!): Person
+    allPersons (phone: YesNo): [Person]!
+    findPerson (name: String!): Person
   }
 
   type Mutation {
@@ -114,6 +119,10 @@ const typeDefs = gql`
       phone: String
       email: String!
     ) : Person
+    editNumber (
+      firstName: String!
+      phone: String!
+    ) : Person
   }
 `
 
@@ -122,7 +131,13 @@ const typeDefs = gql`
 const resolvers = {
   Query: {
     personCount: () => persons.length,
-    allPersons: () => persons,
+    allPersons: (root, args) => {
+      if (!args.phone) return persons
+      const byPhone = (person) =>
+        args.phone === 'YES' ? person.phone : !person.phone
+
+      return persons.filter(byPhone)
+    },
     findPerson: (root, args) => {
       const { name } = args
       return persons.find((person) => person.firstName === name)
@@ -130,14 +145,23 @@ const resolvers = {
   },
   Mutation: {
     addPerson: (root, args) => {
+      if (persons.find((p) => p.firstName === args.firstName)) {
+        throw new UserInputError('Name must be unique', {
+          invalidArgs: args.firstName
+        })
+      }
       const person = { ...args, id: uuid() }
       persons.push(person)
       return person
+    },
+    editNumber: (root, args) => {
+      const person = persons.find(p => p.firstName === args.firstName)
+      if (!person) return null
     }
   },
   Person: {
     enterName: (root) => `${root.firstName} ${root.lastName}`,
-    fullName: (root) => ({ name: root.firstName, last: root.lastName })
+    fullName: (root) => ({ first: root.firstName, last: root.lastName })
   }
 }
 
