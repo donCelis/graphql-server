@@ -5,8 +5,9 @@ import { v4 as uuid } from 'uuid'
 import axios from 'axios'
 
 const getData = async () => {
-  const { data } = await axios.get('http://localhost:3000/persons')
-  return data
+  // const { data } = await axios.get('http://localhost:3000/persons')
+  const { data: { users } } = await axios.get('https://dummyjson.com/users?limit=20')
+  return users
 }
 
 const persons = await getData()
@@ -44,7 +45,7 @@ const typeDefs = gql`
 
   type Query {
     personCount: Int!
-    allPersons (phone: YesNo): [Person]!
+    allPersons (phone: YesNo, limit: Int): [Person]!
     findPerson (name: String!): Person
   }
 
@@ -68,11 +69,13 @@ const resolvers = {
   Query: {
     personCount: () => persons.length,
     allPersons: (root, args) => {
-      if (!args.phone) return persons
-      const byPhone = (person) =>
-        args.phone === 'YES' ? person.phone : !person.phone
+      /* if (!args.phone) return persons */
+      /* const byPhone = (person) =>
+      args.phone === 'YES' ? person.phone : !person.phone */
 
-      return persons.filter(byPhone)
+      /* return persons.filter(byPhone) */
+      if (!args.limit) return persons
+      return persons.slice(0, args.limit)
     },
     findPerson: (root, args) => {
       const { name } = args
