@@ -19,17 +19,14 @@ const typeDefs = gql`
     NO
   }
 
-  type Bank {
-    cardExpire: String!
-    cardNumber: String!
-    cardType: String!
-    currency: String!
-    iban: String!
-  }
-
   type FullNameObj {
     first: String!
     last: String!
+  }
+
+  type Hair {
+    color: String
+    type: String
   }
 
   type Person {
@@ -37,15 +34,20 @@ const typeDefs = gql`
     firstName: String!
     lastName: String!
     phone: String
-    email: String!
-    bank: Bank
+    email: String
     fullName: FullNameObj!
     enterName: String
+    image: String
+    username: String
+    bloodGroup: String
+    age: Int
+    hair: Hair
+    eyeColor: String
   }
 
   type Query {
     personCount: Int!
-    allPersons (phone: YesNo, limit: Int): [Person]!
+    users (phone: YesNo, limit: Int): [Person]!
     findPerson (name: String!): Person
   }
 
@@ -68,7 +70,7 @@ const typeDefs = gql`
 const resolvers = {
   Query: {
     personCount: () => persons.length,
-    allPersons: (root, args) => {
+    users: (root, args) => {
       /* if (!args.phone) return persons */
       /* const byPhone = (person) =>
       args.phone === 'YES' ? person.phone : !person.phone */
